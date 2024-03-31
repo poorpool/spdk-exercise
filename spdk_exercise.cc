@@ -126,8 +126,18 @@ int main() {
     spdk_nvme_qpair_process_completions(ssd_qp, 0);
   }
   printf("memcmp %d\n", memcmp(write_buf, read_buf, kDataLength));
+
+  for (int64_t i = 0; i < kDataLength;) {
+    printf("read c %c %c\n", write_buf[i], read_buf[i]);
+    int64_t len = std::min(int64_t(3191), kDataLength - i);
+    i += len;
+  }
   spdk_free(write_buf);
   spdk_free(read_buf);
-
+  spdk_nvme_ctrlr_free_io_qpair(ssd_qp);
+  for (auto &x : ns_ctrlrs) {
+    spdk_nvme_detach(x);
+  }
+  spdk_env_fini();
   return 0;
 }
